@@ -79,7 +79,7 @@
       function renderComments() {
         commentEl.innerHTML = ''; // очистили html код где id = comment
         comments.forEach((comment, index) => {
-          const likeClass = comment.liked ? '-active-like' : '';
+          const likeClass = comment.liked ? '-active-like' : ''; // Класс для активного лайка
           const newCommentHtml = `
           <li class="comment">
             <div class="comment-header">
@@ -92,61 +92,60 @@
             <div class="comment-footer">
               <div class="likes">
                 <span class="likes-counter">${comment.likes}</span>
-                <button class="like-button ${likeClass}" data-index="${index}"></button>
+                <button class="like-button ${likeClass}" data-index="${index}"></button> 
               </div>
             </div>
-          </li>`;
+          </li>`;//В разметке укажите необходимый класс для иконки лайка в зависимости от значения ключа в массиве.
 
-          commentEl.innerHTML += newCommentHtml;
+          commentEl.innerHTML += newCommentHtml; // Добавление нового комментария в контейнер
 
         });
 
-        attachLikeHandlers();
+        attachLikeHandlers(); // Привязка обработчиков событий к кнопкам лайков
       }
 
-      
-
-      function handleLikeClick(index) {
+      function handleLikeClick(index) { //В функции клика на лайк нужно менять значения ключей в массиве и после этого заново выполнять рендер всех комментариев.
         comments[index].liked = !comments[index].liked; // переключаем состояние лайка
         comments[index].likes += comments[index].liked ? 1 : -1; // обновление количества лайков, если пользователь поставил лайк под комментарием
         renderComments(); // отображает изменения на странице
       }
 
       function attachLikeHandlers() {
-        const likeButtons = document.querySelectorAll('.like-button');
-        likeButtons.forEach(button => {
-          button.addEventListener('click', () => {
-            const index = button.getAttribute('data-index');
-            handleLikeClick(index);
+        const likeButtons = commentEl.querySelectorAll('.like-button'); // все кнопки лайков 
+        likeButtons.forEach((button) => {
+          button.addEventListener('click', (event) => {
+            const index = button.getAttribute('data-index'); // индекс из атрибута data-index 
+            handleLikeClick(index); // Обрабатываем клик по лайку
           });
         });
       }
 
       writeEl.addEventListener('click', () => {
-        if (!nameEl.value || !textareaEl.value) {
+        if (!nameEl.value.trim() || !textareaEl.value.trim()) { // Проверка заполненности полей ввода
           alert('Ошибка! Добавить комментарий возможно только при заполнении всех полей ввода!');
           return;
         }
 
-        const currentDate = new Date();
+        const currentDate = new Date(); // отображение текущей даты в необходимом формате
         const options = { year: '2-digit', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' };
         const dateString = currentDate.toLocaleString('ru-RU', options).replace(',', '');
 
         comments.push({
-          name: nameEl.value,
+          name: nameEl.value.trim(),
           date: dateString,
-          text: textareaEl.value,
+          text: textareaEl.value.trim(),
           likes: 0,
           liked: false
         });
 
+        // Очистка полей ввода
         nameEl.value = "";
         textareaEl.value = "";
           
         renderComments(); // Обновляем отображение комментариев на странице
       });
 
-      renderComments(); // показываем отображения комментариев при загрузке страницы
+      renderComments(); // Первоначальное отображение комментариев при загрузке страницы
   
     </script>
   </body>
