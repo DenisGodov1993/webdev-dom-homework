@@ -45,19 +45,9 @@
         </li>
       </ul>
       <div class="add-form">
-        <input
-          type="text"
-          class="add-form-name"
-          placeholder="Введите ваше имя"
-          id="name"
-        />
-        <textarea
-          type="textarea"
-          class="add-form-text"
-          placeholder="Введите ваш коментарий"
-          rows="4"
-          id="textarea"
-        ></textarea>
+        <input type="text" class="add-form-name" placeholder="Введите ваше имя" id="name"/>
+        <textarea type="textarea" class="add-form-text" placeholder="Введите ваш коментарий" 
+        rows="4" id="textarea"></textarea>
         <div class="add-form-row">
           <button class="add-form-button" id="write">Написать</button>
         </div>
@@ -69,39 +59,95 @@
       const textareaEl = document.getElementById('textarea');
       const writeEl = document.getElementById('write');
 
+      const comments = [ //Добавьте в массив ключи, в которых будет храниться состояние лайка и их количество.
+        {
+          name: "Глеб Фокин",
+          date: "12.02.22 12:18",
+          text: "Это будет первый комментарий на этой странице",
+          likes: 3,
+          liked: false
+        },
+        {
+          name: "Варвара Н.",
+          date: "13.02.22 19:22",
+          text: "Мне нравится как оформлена эта страница! ❤",
+          likes: 75,
+          liked: true
+        }
+      ];
+
+      function renderComments() {
+        commentEl.innerHTML = ''; // очистили html код где id = comment
+        comments.forEach((comment, index) => {
+          const likeClass = comment.liked ? '-active-like' : '';
+          const newCommentHtml = `
+          <li class="comment">
+            <div class="comment-header">
+              <div>${comment.name}</div>
+              <div>${comment.date}</div>
+            </div>
+            <div class="comment-body">
+              <div class="comment-text">${comment.text}</div>
+            </div>
+            <div class="comment-footer">
+              <div class="likes">
+                <span class="likes-counter">${comment.likes}</span>
+                <button class="like-button ${likeClass}" data-index="${index}"></button>
+              </div>
+            </div>
+          </li>`;
+
+          commentEl.innerHTML += newCommentHtml;
+
+        });
+
+        attachLikeHandlers();
+      }
+
+      
+
+      function handleLikeClick(index) {
+        comments[index].liked = !comments[index].liked; // переключаем состояние лайка
+        comments[index].likes += comments[index].liked ? 1 : -1; // обновление количества лайков, если пользователь поставил лайк под комментарием
+        renderComments(); // отображает изменения на странице
+      }
+
+      function attachLikeHandlers() {
+        const likeButtons = document.querySelectorAll('.like-button');
+        likeButtons.forEach(button => {
+          button.addEventListener('click', () => {
+            const index = button.getAttribute('data-index');
+            handleLikeClick(index);
+          });
+        });
+      }
+
       writeEl.addEventListener('click', () => {
-       
         if (!nameEl.value || !textareaEl.value) {
           alert('Ошибка! Добавить комментарий возможно только при заполнении всех полей ввода!');
           return;
         }
 
         const currentDate = new Date();
-        const options = { year: '2-digit', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit'};
+        const options = { year: '2-digit', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' };
         const dateString = currentDate.toLocaleString('ru-RU', options).replace(',', '');
 
-        const newCommentHtml = `
-        <li class="comment">
-          <div class="comment-header">
-            <div>${nameEl.value}</div>
-            <div>${dateString}</div>
-          </div>
-          <div class="comment-body">
-            <div class="comment-text">${textareaEl.value}</div>
-          </div>
-          <div class="comment-footer">
-            <div class="likes">
-              <span class="likes-counter">0</span>
-              <button class="like-button"></button>
-            </div>
-          </div>
-        </li>`;
-
-        commentEl.innerHTML += newCommentHtml;
+        comments.push({
+          name: nameEl.value,
+          date: dateString,
+          text: textareaEl.value,
+          likes: 0,
+          liked: false
+        });
 
         nameEl.value = "";
         textareaEl.value = "";
+          
+        renderComments(); // Обновляем отображение комментариев на странице
       });
+
+      renderComments(); // показываем отображения комментариев при загрузке страницы
+  
     </script>
   </body>
 </html>
