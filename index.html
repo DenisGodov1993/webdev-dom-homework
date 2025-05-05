@@ -46,7 +46,7 @@
       </ul>
       <div class="add-form">
         <input type="text" class="add-form-name" placeholder="Введите ваше имя" id="name"/>
-        <textarea type="textarea" class="add-form-text" placeholder="Введите ваш коментарий" 
+        <textarea type="textarea" class="add-form-text" placeholder="Введите ваш комментарий" 
         rows="4" id="textarea"></textarea>
         <div class="add-form-row">
           <button class="add-form-button" id="write">Написать</button>
@@ -75,9 +75,19 @@
           liked: true
         }
       ];
+      
+      function clearHTML(signs) { // заменяет в HTML небезопасные знаки на безопасные
+        return signs
+          .replaceAll("&", "&amp;")
+          .replaceAll("<", "&lt;")
+          .replaceAll(">", "&gt;")
+          .replaceAll('"', "&quot;")
+          .replaceAll("'", "&apos;");
+      }
 
       function renderComments() {
         commentEl.innerHTML = ''; // очистили html код где id = comment
+
         comments.forEach((comment, index) => {
           const likeClass = comment.liked ? '-active-like' : ''; // Класс для активного лайка
           const newCommentHtml = `
@@ -114,11 +124,24 @@
         const likeButtons = commentEl.querySelectorAll('.like-button'); // все кнопки лайков 
         likeButtons.forEach((button) => {
           button.addEventListener('click', (event) => {
+            event.stopPropagation(); // запрещает, нажимая на лайк, цитировать уже написанный комментарий
             const index = button.getAttribute('data-index'); // индекс из атрибута data-index 
             handleLikeClick(index); // Обрабатываем клик по лайку
           });
         });
       }
+
+      commentEl.addEventListener('click', (event) => {
+        // Проверяем, что клик был НЕ по лайку
+        if (event.target.closest('.like-button')) return;
+        
+        const commentElement = event.target.closest('.comment');// выбераем комментарий,на который хотим ответить
+        if (!commentElement) return; // если кликаем не на комментарий, то выходим из функции
+        
+        const index = [...commentEl.children].indexOf(commentElement); // всё li это массив, получаем коомментарий по которому кликнули
+        const comment = comments[index];// Получаем сам объект комментария из массива comments по индексу.
+        textareaEl.value = `> ${comment.name}: ${comment.text}\n- `; // Заполняем поле для комментария (textarea) текстом в формате цитаты: и перенос строки
+      });
 
       writeEl.addEventListener('click', () => {
         if (!nameEl.value.trim() || !textareaEl.value.trim()) { // Проверка заполненности полей ввода
@@ -131,9 +154,9 @@
         const dateString = currentDate.toLocaleString('ru-RU', options).replace(',', '');
 
         comments.push({
-          name: nameEl.value.trim(),
+          name: clearHTML(nameEl.value.trim()),
           date: dateString,
-          text: textareaEl.value.trim(),
+          text: clearHTML(textareaEl.value.trim()),
           likes: 0,
           liked: false
         });
