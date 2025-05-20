@@ -7,15 +7,32 @@ export function initLikeHandlers() {
     commentEl.addEventListener('click', (event) => {
         const likeButton = event.target.closest('.like-button')
         if (!likeButton) return
-        event.stopPropagation()
 
-        const index = likeButton.getAttribute('data-index')
+        const index = likeButton.dataset.index
         comments[index].liked = !comments[index].liked
         comments[index].likes += comments[index].liked ? 1 : -1
-
         renderComments()
     })
 }
+
+// import { comments } from './comments.js'
+// import { renderComments } from './render.js'
+
+// export function initLikeHandlers() {
+//     const commentEl = document.getElementById('comment')
+
+//     commentEl.addEventListener('click', (event) => {
+//         const likeButton = event.target.closest('.like-button')
+//         if (!likeButton) return
+//         event.stopPropagation()
+
+//         const index = likeButton.getAttribute('data-index')
+//         comments[index].liked = !comments[index].liked
+//         comments[index].likes += comments[index].liked ? 1 : -1
+
+//         renderComments()
+//     })
+// }
 
 // function handleLikeClick(index) {
 //     //В функции клика на лайк нужно менять значения ключей в массиве и после этого заново выполнять рендер всех комментариев.

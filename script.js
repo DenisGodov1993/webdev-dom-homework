@@ -267,4 +267,152 @@
 //     renderComments()
 // })
 
-// renderComments()
+// // код одним файлом с запросами GET и POST
+// const commentEl = document.getElementById('comment')
+// const nameEl = document.getElementById('name')
+// const textareaEl = document.getElementById('textarea')
+// const writeEl = document.getElementById('write')
+
+// let comments = []
+
+// function clearHTML(signs) {
+//     return signs
+//         .replaceAll('&', '&amp;')
+//         .replaceAll('<', '&lt;')
+//         .replaceAll('>', '&gt;')
+//         .replaceAll('"', '&quot;')
+//         .replaceAll("'", '&apos;')
+// }
+
+// // 🟢 Получение комментариев из API
+// function fetchComments() {
+//     fetch('https://wedev-api.sky.pro/api/v1/denis-godov/comments')
+//         .then((response) => {
+//             if (!response.ok) throw new Error('Ошибка загрузки комментариев')
+//             return response.json()
+//         })
+//         .then((data) => {
+//             comments = data.comments.map((item) => ({
+//                 name: item.author.name,
+//                 date: new Date(item.date)
+//                     .toLocaleString('ru-RU', {
+//                         year: '2-digit',
+//                         month: '2-digit',
+//                         day: '2-digit',
+//                         hour: '2-digit',
+//                         minute: '2-digit',
+//                     })
+//                     .replace(',', ''),
+//                 text: item.text,
+//                 likes: item.likes,
+//                 liked: item.isLiked,
+//             }))
+//             renderComments()
+//         })
+//         .catch((error) => {
+//             alert(error.message)
+//         })
+// }
+
+// // 🟢 Отправка нового комментария в API
+// function postComment(name, text) {
+//     return fetch('https://wedev-api.sky.pro/api/v1/denis-godov/comments', {
+//         method: 'POST',
+//         body: JSON.stringify({
+//             name: name,
+//             text: text,
+//         }),
+//     }).then((response) => {
+//         if (response.status === 400) {
+//             return response.json().then((data) => {
+//                 throw new Error(data.error)
+//             })
+//         }
+//         if (!response.ok) throw new Error('Ошибка при отправке')
+//         return response.json()
+//     })
+// }
+
+// function renderComments() {
+//     commentEl.innerHTML = ''
+
+//     comments.forEach((comment, index) => {
+//         const likeClass = comment.liked ? '-active-like' : ''
+//         const newCommentHtml = `
+//           <li class="comment">
+//             <div class="comment-header">
+//               <div>${comment.name}</div>
+//               <div>${comment.date}</div>
+//             </div>
+//             <div class="comment-body">
+//               <div class="comment-text">${comment.text}</div>
+//             </div>
+//             <div class="comment-footer">
+//               <div class="likes">
+//                 <span class="likes-counter">${comment.likes}</span>
+//                 <button class="like-button ${likeClass}" data-index="${index}"></button>
+//               </div>
+//             </div>
+//           </li>`
+
+//         commentEl.innerHTML += newCommentHtml
+//     })
+
+//     attachLikeHandlers()
+// }
+
+// function handleLikeClick(index) {
+//     comments[index].liked = !comments[index].liked
+//     comments[index].likes += comments[index].liked ? 1 : -1
+//     renderComments()
+// }
+
+// function attachLikeHandlers() {
+//     const likeButtons = commentEl.querySelectorAll('.like-button')
+//     likeButtons.forEach((button) => {
+//         button.addEventListener('click', (event) => {
+//             event.stopPropagation()
+//             const index = button.getAttribute('data-index')
+//             handleLikeClick(index)
+//         })
+//     })
+// }
+
+// commentEl.addEventListener('click', (event) => {
+//     if (event.target.closest('.like-button')) return
+
+//     const commentElement = event.target.closest('.comment')
+//     if (!commentElement) return
+
+//     const index = [...commentEl.children].indexOf(commentElement)
+//     const comment = comments[index]
+//     textareaEl.value = `> ${comment.name}: ${comment.text}\n- `
+// })
+
+// writeEl.addEventListener('click', () => {
+//     const name = nameEl.value.trim()
+//     const text = textareaEl.value.trim()
+
+//     if (name.length < 3 || text.length < 3) {
+//         alert('Имя и текст должны быть не короче 3 символов')
+//         return
+//     }
+
+//     writeEl.disabled = true
+//     writeEl.textContent = 'Отправка...'
+
+//     postComment(clearHTML(name), clearHTML(text))
+//         .then(() => fetchComments())
+//         .then(() => {
+//             nameEl.value = ''
+//             textareaEl.value = ''
+//         })
+//         .catch((error) => alert(error.message))
+//         .finally(() => {
+//             writeEl.disabled = false
+//             writeEl.textContent = 'Написать'
+//         })
+// })
+
+// // 🚀 Загрузка комментариев при старте
+// fetchComments()
