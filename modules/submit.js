@@ -31,9 +31,19 @@ function fetchComments() {
 function postComment({ name, text }) {
     return fetch('https://wedev-api.sky.pro/api/v1/denis-godov/comments', {
         method: 'POST',
-        body: JSON.stringify({ name, text }),
+        body: JSON.stringify({ name, text, forceError: false }), //true }), -для получение ошибки 500
     }).then((response) => {
-        return response.json()
+        if (response.status === 201) {
+            return response.json()
+        } else {
+            if (response.status === 500) {
+                throw new Error('Сервер сломался, попробуй позже')
+            }
+
+            if (response.status === 400) {
+                throw new Error('Неверный запрос!')
+            }
+        }
     })
 }
 
@@ -48,7 +58,7 @@ export function initSubmitHandler() {
         const text = textareaEl.value.trim()
 
         if (name.length < 3 || text.length < 3) {
-            alert('Имя и комментарий должны содержать минимум 3 символа')
+            alert('Имя и комментарий должны быть не короче 3 символов')
             return
         }
 
@@ -59,13 +69,19 @@ export function initSubmitHandler() {
             name: clearHTML(name),
             text: clearHTML(text),
         })
+            // .then(() => {
+            //     throw new Error(
+            //         'Кажется, у вас сломался интернет, попробуйте позже',
+            //     )
+            // })
             .then(() => {
                 nameEl.value = ''
                 textareaEl.value = ''
                 return fetchComments()
             })
-            .catch((error) => {
-                alert(error.message)
+            .catch(() => {
+                // alert(Error.message)
+                alert('Кажется, у вас сломался интернет, попробуйте позже')
             })
             .finally(() => {
                 writeEl.disabled = false
@@ -238,3 +254,13 @@ export function initSubmitHandler() {
 
 //     renderComments() // Обновляем отображение комментариев на странице
 // })
+
+// // Отправка комментария на сервер
+// function postComment({ name, text }) {
+//     return fetch('https://wedev-api.sky.pro/api/v1/denis-godov/comments', {
+//         method: 'POST',
+//         body: JSON.stringify({ name, text }),
+//     }).then((response) => {
+//         return response.json()
+//     })
+// }
