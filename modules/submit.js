@@ -2,10 +2,12 @@ import { clearHTML } from './utils.js'
 import { renderComments } from './render.js'
 import { updateComments } from './comments.js'
 
-// Функция загрузки комментариев с сервера
+// Загрузка комментариев
 function fetchComments() {
     return fetch('https://wedev-api.sky.pro/api/v1/denis-godov/comments')
-        .then((response) => response.json())
+        .then((response) => {
+            return response.json()
+        })
         .then((data) => {
             const newComments = data.comments.map((item) => ({
                 name: item.author.name,
@@ -25,13 +27,16 @@ function fetchComments() {
             updateComments(newComments)
             renderComments()
         })
+    // .catch(() => {
+    //     alert('Кажется, у вас сломался интернет, попробуйте позже')
+    // })
 }
 
-// Отправка комментария на сервер
+// POST-запрос // если изменить адрес https, будет ошибка 404
 function postComment({ name, text }) {
     return fetch('https://wedev-api.sky.pro/api/v1/denis-godov/comments', {
         method: 'POST',
-        body: JSON.stringify({ name, text, forceError: false }), //true }), -для получение ошибки 500
+        body: JSON.stringify({ name, text, forceError: true }), // true — для текста ошибки 500, false
     }).then((response) => {
         if (response.status === 201) {
             return response.json()
@@ -39,11 +44,13 @@ function postComment({ name, text }) {
             if (response.status === 500) {
                 throw new Error('Сервер сломался, попробуй позже')
             }
-
             if (response.status === 400) {
-                throw new Error('Неверный запрос!')
+                throw new Error(
+                    'Имя и комментарий должны быть не короче 3 символов',
+                )
             }
         }
+        throw new Error('Кажется, у вас сломался интернет, попробуйте позже')
     })
 }
 
@@ -53,14 +60,9 @@ export function initSubmitHandler() {
     const textareaEl = document.getElementById('textarea')
     const writeEl = document.getElementById('write')
 
-    writeEl.addEventListener('click', () => {
+    function handlePostClick() {
         const name = nameEl.value.trim()
         const text = textareaEl.value.trim()
-
-        if (name.length < 3 || text.length < 3) {
-            alert('Имя и комментарий должны быть не короче 3 символов')
-            return
-        }
 
         writeEl.disabled = true
         writeEl.textContent = 'Комментарий добавляется...'
@@ -69,35 +71,45 @@ export function initSubmitHandler() {
             name: clearHTML(name),
             text: clearHTML(text),
         })
-            // .then(() => {
-            //     throw new Error(
-            //         'Кажется, у вас сломался интернет, попробуйте позже',
-            //     )
-            // })
             .then(() => {
                 nameEl.value = ''
                 textareaEl.value = ''
                 return fetchComments()
             })
-            .catch(() => {
-                // alert(Error.message)
-                alert('Кажется, у вас сломался интернет, попробуйте позже')
+
+            .catch((error) => {
+                if (error.message === 'Сервер сломался, попробуй позже') {
+                    // Повторяем запрос сразу, без задержки и без вывода в консоль, setTimeout и console.warn лучше использовать
+                    handlePostClick()
+                } else if (
+                    error.message ===
+                    'Имя и комментарий должны быть не короче 3 символов'
+                ) {
+                    alert(error.message)
+                } else {
+                    alert('Кажется, у вас сломался интернет, попробуйте позже')
+                }
             })
             .finally(() => {
                 writeEl.disabled = false
                 writeEl.textContent = 'Написать'
             })
-    })
+    }
+
+    writeEl.addEventListener('click', handlePostClick)
 }
 
+// код без дополнительного задания
 // import { clearHTML } from './utils.js'
 // import { renderComments } from './render.js'
 // import { updateComments } from './comments.js'
 
-// // Функция загрузки комментариев с сервера
+// // Загрузка комментариев
 // function fetchComments() {
 //     return fetch('https://wedev-api.sky.pro/api/v1/denis-godov/comments')
-//         .then((response) => response.json())
+//         .then((response) => {
+//             return response.json()
+//         })
 //         .then((data) => {
 //             const newComments = data.comments.map((item) => ({
 //                 name: item.author.name,
@@ -119,21 +131,25 @@ export function initSubmitHandler() {
 //         })
 // }
 
-// // Отправка комментария на сервер
+// // POST-запрос
 // function postComment({ name, text }) {
 //     return fetch('https://wedev-api.sky.pro/api/v1/denis-godov/comments', {
 //         method: 'POST',
-//         body: JSON.stringify({ name, text }),
+//         body: JSON.stringify({ name, text, forceError: true }), // true — для теста ошибки 500, false
 //     }).then((response) => {
-//         if (response.status === 400) {
-//             return response.json().then((data) => {
-//                 throw new Error(data.error)
-//             })
+//         if (response.status === 201) {
+//             return response.json()
+//         } else {
+//             if (response.status === 500) {
+//                 throw new Error('Сервер сломался, попробуй позже')
+//             }
+//             if (response.status === 400) {
+//                 throw new Error(
+//                     'Имя и комментарий должны быть не короче 3 символов',
+//                 )
+//             }
 //         }
-//         if (!response.ok) {
-//             throw new Error('Ошибка при отправке комментария')
-//         }
-//         return response.json()
+//         throw new Error('Кажется, у вас сломался интернет, попробуйте позже')
 //     })
 // }
 
@@ -147,13 +163,8 @@ export function initSubmitHandler() {
 //         const name = nameEl.value.trim()
 //         const text = textareaEl.value.trim()
 
-//         if (name.length < 3 || text.length < 3) {
-//             alert('Имя и комментарий должны содержать минимум 3 символа')
-//             return
-//         }
-
 //         writeEl.disabled = true
-//         writeEl.textContent = 'Отправка...'
+//         writeEl.textContent = 'Комментарий добавляется...'
 
 //         postComment({
 //             name: clearHTML(name),
@@ -164,8 +175,17 @@ export function initSubmitHandler() {
 //                 textareaEl.value = ''
 //                 return fetchComments()
 //             })
+
 //             .catch((error) => {
-//                 alert(error.message)
+//                 if (
+//                     error.message === 'Сервер сломался, попробуй позже' ||
+//                     error.message ===
+//                         'Имя и комментарий должны быть не короче 3 символов'
+//                 ) {
+//                     alert(error.message)
+//                 } else {
+//                     alert('Кажется, у вас сломался интернет, попробуйте позже')
+//                 }
 //             })
 //             .finally(() => {
 //                 writeEl.disabled = false
