@@ -52,7 +52,8 @@ body {
 
   .comment-footer {
     display: flex;
-    justify-content: flex-end;
+    /* justify-content: flex-end; */
+    justify-content: space-between; /* новый стиль*/
   }
 
   .comment-body {
@@ -96,10 +97,12 @@ body {
     margin-top: 48px;
     display: flex;
     flex-direction: column;
+    gap: 16px;/* новый параметр*/
   }
 
   .add-form-name,
-  .add-form-text {
+  .add-form-text,
+  .add-form-login /* новый параметр*/ {
     font-size: 16px;
     font-family: Helvetica;
     border-radius: 8px;
@@ -117,9 +120,30 @@ body {
     resize: none;
   }
 
+  /* новый стиль*/
+  .add-form-login { 
+    width: 300px;
+    padding: 11px 22px;
+  }
+ /* новый стиль*/
+  .add-form-delete {
+    display: flex;
+    align-items: center;
+  }
+ /* новый стиль*/
+  .add-form-delete-btn {
+    font-size: 24px;
+    padding: 10px 20px;
+    background-color: #bcec30;
+    border: none;
+    border-radius: 18px;
+    cursor: pointer;
+  }
+
   .add-form-row {
     display: flex;
-    justify-content: flex-end;
+    /* justify-content: flex-end; */
+    justify-content: space-between;
   }
 
   .add-form-button {
@@ -135,22 +159,21 @@ body {
   .add-form-button:hover {
     opacity: 0.9;
   }
-
-@keyframes rotating {
-   from {
+  
+  @keyframes rotating {
+    from {
       transform: rotate(0deg);
-   }
-   25% {
-      transform: rotate(50deg);;
-   }
-   75% {
-      transform: rotate(-50deg);;
-   }
-   to {
+    }
+    25% {
+      transform: rotate(50deg);
+    }
+    75% {
+      transform: rotate(-50deg);
+    }
+    to {
       transform: rotate(0deg);
-   }
-}
-
-.-loading-like {
-   animation: rotating 2s linear infinite;
-}
+    }
+  }
+  .-loading-like {
+    animation: rotating 2s linear infinite;
+  }

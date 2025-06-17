@@ -117,9 +117,15 @@ body {
     resize: none;
   }
 
+  // .add-form-login {
+  //   width: 300px;
+  //   padding: 11px 22px;
+  // }
+
   .add-form-row {
     display: flex;
-    justify-content: flex-end;
+    // justify-content: flex-end;
+    justify-content: space-between;
   }
 
   .add-form-button {
